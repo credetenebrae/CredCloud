@@ -5,8 +5,8 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Карта вайбкодинга</title>
 <style>
-:root{--bg:#eaf3fb;--cloud:#ffffff;--ink:#1d2a3a;--muted:#55657a;--adv:#0fb5ae;--accent:#4a6cf7;--ghost:#ffffff;--ghostline:#8fb0e8}
-@media (prefers-color-scheme:dark){:root{--bg:#0f1622;--cloud:#1c2636;--ink:#e6edf6;--muted:#9fb0c6;--adv:#2fe0d6;--accent:#8aa2ff;--ghost:#2e4263;--ghostline:#7d9fe0}}
+:root{--bg:#eaf3fb;--cloud:#ffffff;--ink:#1d2a3a;--muted:#55657a;--adv:#8b5cf6;--accent:#4a6cf7;--ghost:#ffffff;--ghostline:#8fb0e8}
+@media (prefers-color-scheme:dark){:root{--bg:#0f1622;--cloud:#1c2636;--ink:#e6edf6;--muted:#9fb0c6;--adv:#b79cff;--accent:#8aa2ff;--ghost:#2e4263;--ghostline:#7d9fe0}}
 *{box-sizing:border-box}
 html,body{margin:0;height:100%;overflow:hidden;background:var(--bg);color:var(--ink);font-family:system-ui,"Segoe UI",Roboto,sans-serif}
 #viewport{position:fixed;inset:0;cursor:grab;touch-action:none;user-select:none}
@@ -39,6 +39,7 @@ code{background:rgba(74,108,247,.12);padding:0 6px;border-radius:6px;font-size:.
 #hud button{border:0;border-radius:999px;padding:10px 16px;background:var(--cloud);color:var(--ink);font-size:15px;box-shadow:0 4px 14px rgba(0,0,0,.15);cursor:pointer}
 #legend{position:fixed;right:16px;top:16px;max-width:300px;background:var(--cloud);padding:12px 16px;border-radius:18px;font-size:13px;line-height:1.5;box-shadow:0 4px 14px rgba(0,0,0,.15);z-index:5}
 #legend b.a{color:var(--adv)}
+#legend b.o{color:var(--ghostline)}
 #links{position:absolute;left:0;top:0;pointer-events:none;overflow:visible;z-index:10}
 #links path{fill:none;stroke:var(--accent);stroke-width:10;stroke-dasharray:30 24;stroke-linecap:round;animation:dash 1s linear infinite}
 @keyframes dash{to{stroke-dashoffset:-54}}
@@ -68,7 +69,7 @@ code{background:rgba(74,108,247,.12);padding:0 6px;border-radius:6px;font-size:.
 <svg width="0" height="0" style="position:absolute"><filter id="cloudOutline" x="-5%" y="-5%" width="110%" height="110%"><feMorphology in="SourceAlpha" operator="dilate" radius="7" result="d"/><feComposite in="d" in2="SourceAlpha" operator="out" result="ring"/><feFlood id="olFlood"/><feComposite in2="ring" operator="in"/></filter></svg>
 <div id="viewport"><div id="world"></div></div>
 <div id="hud"><button id="zin">＋</button><button id="zout">－</button><button id="home">Обзор всей карты</button></div>
-<div id="legend">Колесо мыши / щипок — масштаб, перетаскивание — перемещение. Клик по большому облаку — приблизить.<br><b class="a">Бирюзовая пунктирная рамка</b> — суперпродвинутая тема: просто знай, что она есть. Облака с контуром (outline) — «самостоятельные».</div>
+<div id="legend">Колесо мыши / щипок — масштаб, перетаскивание — перемещение. Клик по большому облаку — приблизить.<br><b class="a">Фиолетовая пунктирная рамка</b> — суперпродвинутая тема: просто знай, что она есть. Облака с <b class="o">контуром</b> (outline) — «самостоятельные».</div>
 <script>
 const A = t => ({adv:true,t});
 const DATA = [
@@ -225,7 +226,7 @@ const ROAD=[
   r:[L("https://docs.claude.com/en/docs/claude-code/security","Security в Claude Code"),L("https://owasp.org/www-project-top-10-for-large-language-model-applications/","OWASP Top 10 для LLM")]},
  {h:"Дальше — по желанию",w:"когда освоишься",to:["Суперпродвинутое"],
   g:"Цель: выбрать одну продвинутую тему под свою работу.",
-  p:["Параллельные агенты, агенты в CI, локальные модели — смотри бирюзовые темы на карте"],r:[]}
+  p:["Параллельные агенты, агенты в CI, локальные модели — смотри фиолетовые темы на карте"],r:[]}
 ];
 const road=document.createElement('div');road.className='big road';
 road.style.padding='160px 160px 140px';
