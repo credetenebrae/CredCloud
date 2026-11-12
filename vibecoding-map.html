@@ -358,7 +358,7 @@ document.getElementById('zin').onclick=()=>zoomAt(1.4,innerWidth/2,innerHeight/2
 document.getElementById('zout').onclick=()=>zoomAt(1/1.4,innerWidth/2,innerHeight/2);
 document.getElementById('home').onclick=home;
 addEventListener('keydown',e=>{if(e.key==='Escape')home()});
-home();
+fit(road.offsetLeft,road.offsetTop-200,road.offsetWidth,road.offsetHeight+400,false); // при загрузке — сразу на роадмап
 </script>
 </body>
 </html>
