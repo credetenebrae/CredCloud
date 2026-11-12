@@ -50,6 +50,14 @@ code{background:rgba(74,108,247,.12);padding:0 6px;border-radius:6px;font-size:.
 .step .goal{font-weight:600;margin:8px 0}
 .step ul{margin:6px 0;padding-left:28px}
 .step a{color:var(--accent)}
+#pop{position:fixed;z-index:20;display:none;flex-direction:column;align-items:flex-start;gap:10px;padding:18px 22px 22px;background:var(--cloud);border-radius:28px;box-shadow:0 12px 40px rgba(0,0,0,.25);max-width:340px}
+#pop.open{display:flex}
+#pop .pt{font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.mini{position:relative;isolation:isolate;border:0;cursor:pointer;font:600 15px system-ui,"Segoe UI",sans-serif;color:var(--ink);background:var(--bg);padding:12px 20px;border-radius:999px;margin:8px 0 0 4px;transition:transform .15s,background .15s;text-align:left}
+.mini::before,.mini::after{content:"";position:absolute;z-index:-1;background:inherit;border-radius:50%}
+.mini::before{width:34px;height:34px;left:14px;top:-12px}
+.mini::after{width:26px;height:26px;left:40px;top:-8px}
+.mini:hover{transform:translateX(4px);background:var(--accent);color:var(--bg)}
 .step .to{font-size:20px;color:var(--muted);margin-top:10px}
 </style>
 </head>
@@ -268,19 +276,50 @@ const NS='http://www.w3.org/2000/svg',links=document.createElementNS(NS,'svg');
 links.id='links';links.setAttribute('width',W);links.setAttribute('height',H);world.appendChild(links);
 const byTitle=Object.fromEntries(DATA.map(c=>[c.t,c.el]));
 function wpos(el){const b=el.getBoundingClientRect();return{x:(b.left-x)/s,y:(b.top-yy)/s,w:b.width/s,h:b.height/s}}
-road.querySelectorAll('.num').forEach(n=>{
-  n.addEventListener('mouseenter',()=>{
-    const p=wpos(n),sx=p.x+p.w/2,sy=p.y;links.innerHTML='';
-    n.dataset.to.split('|').forEach(t=>{const el=byTitle[t];if(!el)return;el.classList.add('hl');
-      const tx=el.offsetLeft+el.offsetWidth/2,ty=el.offsetTop+el.offsetHeight+40;
-      const path=document.createElementNS(NS,'path');
-      path.setAttribute('d',`M${sx},${sy} C${sx},${sy-(sy-ty)*0.5} ${tx},${ty+(sy-ty)*0.5} ${tx},${ty}`);
-      links.appendChild(path);});
-  });
-  n.addEventListener('mouseleave',()=>{links.innerHTML='';document.querySelectorAll('.big.hl').forEach(e=>e.classList.remove('hl'))});
-  n.addEventListener('click',e=>{e.stopPropagation();const el=byTitle[n.dataset.to.split('|')[0]];
-    if(el)fit(el.offsetLeft,el.offsetTop-160,el.offsetWidth,el.offsetHeight+160)});
+// ===== Меню-облачка у номера: наведение открывает, уход с номера/меню/безопасного треугольника закрывает =====
+const pop=document.createElement('div');pop.id='pop';document.body.appendChild(pop);
+let popNum=null,anchor=null;
+function clearHl(){links.innerHTML='';document.querySelectorAll('.big.hl').forEach(e=>e.classList.remove('hl'))}
+function drawLinks(n,only){
+  clearHl();const p=wpos(n),sx=p.x+p.w/2,sy=p.y;
+  n.dataset.to.split('|').forEach(t=>{const el=byTitle[t];if(!el||(only&&only!==t))return;el.classList.add('hl');
+    const tx=el.offsetLeft+el.offsetWidth/2,ty=el.offsetTop+el.offsetHeight+40;
+    const path=document.createElementNS(NS,'path');
+    path.setAttribute('d',`M${sx},${sy} C${sx},${sy-(sy-ty)*0.5} ${tx},${ty+(sy-ty)*0.5} ${tx},${ty}`);
+    links.appendChild(path);});
+}
+function openPop(n){
+  if(popNum===n)return;popNum=n;drawLinks(n);
+  pop.innerHTML='<div class="pt">Перейти к облаку</div>'+n.dataset.to.split('|').map(t=>`<button class="mini" data-t="${t}">${t}</button>`).join('');
+  const r=n.getBoundingClientRect();pop.classList.add('open');
+  const pw=pop.offsetWidth,ph=pop.offsetHeight;
+  let left=r.right+14,side='r';if(left+pw>innerWidth-8){left=r.left-14-pw;side='l'}
+  const top=Math.max(8,Math.min(innerHeight-ph-8,r.top+r.height/2-ph/2));
+  pop.style.left=left+'px';pop.style.top=top+'px';pop.dataset.side=side;
+}
+function closePop(){if(!popNum)return;popNum=null;anchor=null;pop.classList.remove('open');clearHl()}
+const inR=(p,r,pad=0)=>p.x>=r.left-pad&&p.x<=r.right+pad&&p.y>=r.top-pad&&p.y<=r.bottom+pad;
+function inTri(p,a,b,c){const s=(p1,p2,p3)=>(p1.x-p3.x)*(p2.y-p3.y)-(p2.x-p3.x)*(p1.y-p3.y);
+  const d1=s(p,a,b),d2=s(p,b,c),d3=s(p,c,a);return !((d1<0||d2<0||d3<0)&&(d1>0||d2>0||d3>0))}
+addEventListener('pointermove',e=>{
+  if(!popNum)return;const p={x:e.clientX,y:e.clientY};
+  const nr=popNum.getBoundingClientRect(),pr=pop.getBoundingClientRect();
+  if(inR(p,nr,4)){anchor=p;return}          // на номере — запоминаем вершину треугольника
+  if(inR(p,pr))return;                       // внутри меню
+  if(anchor){const ex=pop.dataset.side==='r'?pr.left:pr.right;   // безопасный треугольник к ближнему краю меню
+    if(inTri(p,anchor,{x:ex,y:pr.top-10},{x:ex,y:pr.bottom+10}))return;}
+  closePop();
 });
+pop.addEventListener('mouseover',e=>{const b=e.target.closest('.mini');if(b&&popNum)drawLinks(popNum,b.dataset.t)});
+pop.addEventListener('mouseleave',()=>{if(popNum)drawLinks(popNum)});
+pop.addEventListener('click',e=>{const b=e.target.closest('.mini');if(!b)return;const el=byTitle[b.dataset.t];closePop();
+  if(el)fit(el.offsetLeft,el.offsetTop-160,el.offsetWidth,el.offsetHeight+160)});
+road.querySelectorAll('.num').forEach(n=>{
+  n.addEventListener('mouseenter',e=>{anchor={x:e.clientX,y:e.clientY};openPop(n)});
+  n.addEventListener('click',e=>{e.stopPropagation();popNum===n?closePop():openPop(n)});  // для тача
+});
+vp.addEventListener('wheel',closePop);
+vp.addEventListener('pointerdown',e=>{if(!e.target.closest('.num'))closePop()});
 
 let s=1,x=0,yy=0;
 function apply(anim){world.classList.toggle('noanim',!anim);world.style.transform=`translate(${x}px,${yy}px) scale(${s})`;
