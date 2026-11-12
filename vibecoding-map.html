@@ -21,8 +21,8 @@ html,body{margin:0;height:100%;overflow:hidden;background:var(--bg);color:var(--
 .big.hl>.cbg{filter:drop-shadow(0 0 60px var(--accent)) drop-shadow(0 0 20px var(--accent))}
 .big h2{margin:0 0 50px;text-align:center;font-size:150px;line-height:1;letter-spacing:-2px;cursor:pointer}
 .big .sub{text-align:center;font-size:44px;color:var(--muted);margin:-30px 0 50px}
-.kids{display:flex;flex-wrap:wrap;gap:36px;justify-content:center;transition:opacity .3s}
-.kid{width:400px;padding:34px 40px;position:relative;isolation:isolate;margin:20px 10px}
+.kids{display:flex;flex-wrap:wrap;align-items:flex-start;justify-content:center;transition:opacity .3s}
+.kid{width:400px;padding:34px 40px;position:relative;isolation:isolate}
 .kid>.cbg g{fill:var(--bg)}
 .kid.adv>.cbg{display:none}
 .kid h3{margin:0 0 12px;font-size:30px}
@@ -167,7 +167,7 @@ const DATA = [
 ];
 
 const world=document.getElementById('world'), vp=document.getElementById('viewport');
-const COLS=4, CW=1500, GX=800, GY=750;
+const COLS=4, CW=1500, GAP=120, PAD=200; // GAP — минимальный зазор между краями облаков (с пуфами)
 const heights=[];
 DATA.forEach((c,i)=>{
   const el=document.createElement('div'); el.className='big'+(c.o?' orphan':'');
@@ -175,14 +175,6 @@ DATA.forEach((c,i)=>{
     c.k.map(k=>k.adv?`<div class="kid adv"><h3>${k.t}</h3></div>`:`<div class="kid"><h3>${k[0]}</h3><p>${k[1]}</p></div>`).join('')}</div>`;
   world.appendChild(el); c.el=el;
 });
-// раскладка по сетке (высота ряда — по самому высокому облаку)
-let y=200;
-for(let r=0;r*COLS<DATA.length;r++){
-  const row=DATA.slice(r*COLS,r*COLS+COLS); let h=0;
-  row.forEach((c,j)=>{c.el.style.left=(200+j*(CW+GX))+'px';c.el.style.top=y+'px';h=Math.max(h,c.el.offsetHeight)});
-  y+=h+GY;
-}
-const W=200*2+COLS*CW+(COLS-1)*GX;
 
 // ===== Роадмап =====
 const L=(u,t)=>`<a href="${u}" target="_blank" rel="noopener">${t}</a>`;
@@ -224,12 +216,10 @@ const ROAD=[
   p:["Параллельные агенты, агенты в CI, локальные модели — смотри бирюзовые темы на карте"],r:[]}
 ];
 const road=document.createElement('div');road.className='big road';
-road.style.left='200px';road.style.top=y+'px';road.style.width=(W-400)+'px';road.style.padding='160px 160px 140px';
+road.style.padding='160px 160px 140px';
 road.innerHTML=`<h2>Роадмап</h2><div class="sub">с чего начать и во что углубляться · наведи на номер — увидишь, к каким облакам он ведёт</div><div class="steps">${
  ROAD.map((st,i)=>`<div class="step"><div class="num" data-to="${st.to.join('|')}">${i+1}</div><h3>${st.h}</h3><div class="when">${st.w}</div><div class="goal">${st.g}</div><ul>${st.p.map(x=>`<li>${x}</li>`).join('')}</ul>${st.r.length?`<div>📖 ${st.r.join(' · ')}</div>`:''}<div class="to">→ ${st.to.join(', ')}</div></div>`).join('')}</div>`;
 world.appendChild(road);
-const H=y+road.offsetHeight+300;
-world.style.width=W+'px'; world.style.height=H+'px';
 
 // ===== Настоящие облака: тело + «пуфы» по всему периметру =====
 function rng(seed){return()=>{seed=(seed*16807)%2147483647;return seed/2147483647}}
@@ -237,8 +227,10 @@ function cloudify(el,seed,big){
   const w=el.offsetWidth,h=el.offsetHeight,R=rng(seed+7);
   const r=Math.min(big?260:70,Math.max(big?120:34,Math.min(w,h)*0.17)),m=r*2;
   let c=`<rect x="0" y="0" width="${w}" height="${h}" rx="${r}"/>`;
+  const ext={l:0,t:0,r:0,b:0};
   const edge=(x1,y1,x2,y2,lo,hi)=>{const len=Math.hypot(x2-x1,y2-y1),n=Math.max(2,Math.round(len/(r*1.25)));
-    for(let i=0;i<=n;i++){const t=i/n,rr=r*(lo+R()*(hi-lo));c+=`<circle cx="${x1+(x2-x1)*t+(R()-.5)*r*.3}" cy="${y1+(y2-y1)*t}" r="${rr}"/>`}};
+    for(let i=0;i<=n;i++){const t=i/n,rr=r*(lo+R()*(hi-lo)),cx=x1+(x2-x1)*t+(R()-.5)*r*.3,cy=y1+(y2-y1)*t;c+=`<circle cx="${cx}" cy="${cy}" r="${rr}"/>`;
+      ext.l=Math.max(ext.l,rr-cx);ext.t=Math.max(ext.t,rr-cy);ext.r=Math.max(ext.r,cx+rr-w);ext.b=Math.max(ext.b,cy+rr-h)}};
   const ins=r*0.35;
   edge(ins,ins,w-ins,ins,1.0,1.6);        // верх — крупные пуфы
   edge(w-ins,ins,w-ins,h-ins,0.8,1.2);    // право
@@ -249,9 +241,27 @@ function cloudify(el,seed,big){
   svg.style.left=-m+'px';svg.style.top=-m+'px';
   svg.innerHTML=`<g transform="translate(${m},${m})">${c}</g>`;
   el.prepend(svg);
+  return ext;
 }
-document.querySelectorAll('.kid').forEach((k,i)=>cloudify(k,i*31+5,false));
-document.querySelectorAll('.big').forEach((b,i)=>cloudify(b,i*97+3,true));
+// маленькие облака: отступ = выступ пуфов + половина зазора, поэтому соседи не касаются
+const KGAP=60;
+document.querySelectorAll('.kid').forEach((k,i)=>{const e=cloudify(k,i*31+5,false);
+  k.style.margin=`${e.t+KGAP/2}px ${e.r+KGAP/2}px ${e.b+KGAP/2}px ${e.l+KGAP/2}px`;});
+// большие облака: сетка с учётом реальных выступов
+DATA.forEach((c,i)=>c.ext=cloudify(c.el,i*97+3,true));
+const E=Math.max(...DATA.map(c=>Math.max(c.ext.l,c.ext.r)));
+const W=2*(PAD+E)+COLS*CW+(COLS-1)*(2*E+GAP);
+const rows=[];for(let i=0;i<DATA.length;i+=COLS)rows.push(DATA.slice(i,i+COLS));
+let y=PAD+Math.max(...rows[0].map(c=>c.ext.t));
+rows.forEach((row,ri)=>{let h=0,b=0;
+  row.forEach((c,j)=>{c.el.style.left=(PAD+E+j*(CW+2*E+GAP))+'px';c.el.style.top=y+'px';h=Math.max(h,c.el.offsetHeight);b=Math.max(b,c.ext.b)});
+  const nt=ri+1<rows.length?Math.max(...rows[ri+1].map(c=>c.ext.t)):0;
+  row.bottom=y+h+b; y=y+h+b+GAP+nt;});
+road.style.width=(W-2*(PAD+E))+'px';road.style.left=(PAD+E)+'px';
+const re=cloudify(road,777,true);
+y=rows[rows.length-1].bottom+GAP+re.t; road.style.top=y+'px';
+const H=y+road.offsetHeight+re.b+PAD;
+world.style.width=W+'px'; world.style.height=H+'px';
 
 // ===== Пунктирные линии от номера к облакам =====
 const NS='http://www.w3.org/2000/svg',links=document.createElementNS(NS,'svg');
