@@ -17,7 +17,7 @@ html,body{margin:0;height:100%;overflow:hidden;background:var(--bg);color:var(--
 .cbg{position:absolute;z-index:-1;overflow:visible;pointer-events:none}
 .big>.cbg{filter:drop-shadow(0 30px 40px rgba(40,70,120,.18));transition:filter .3s}
 .big .cbg g{fill:var(--cloud)}
-.big.orphan>.cbg g{fill:var(--orphan)}
+.big.orphan>.cbg g{fill:var(--cloud);opacity:.45}
 .big.hl>.cbg{filter:drop-shadow(0 0 60px var(--accent)) drop-shadow(0 0 20px var(--accent))}
 .big h2{margin:0 0 50px;text-align:center;font-size:150px;line-height:1;letter-spacing:-2px;cursor:pointer}
 .big .sub{text-align:center;font-size:44px;color:var(--muted);margin:-30px 0 50px}
@@ -64,7 +64,7 @@ code{background:rgba(74,108,247,.12);padding:0 6px;border-radius:6px;font-size:.
 <body>
 <div id="viewport"><div id="world"></div></div>
 <div id="hud"><button id="zin">＋</button><button id="zout">－</button><button id="home">Обзор всей карты</button></div>
-<div id="legend">Колесо мыши / щипок — масштаб, перетаскивание — перемещение. Клик по большому облаку — приблизить.<br><b class="a">Бирюзовая пунктирная рамка</b> — суперпродвинутая тема: просто знай, что она есть. Жёлтые облака — «самостоятельные».</div>
+<div id="legend">Колесо мыши / щипок — масштаб, перетаскивание — перемещение. Клик по большому облаку — приблизить.<br><b class="a">Бирюзовая пунктирная рамка</b> — суперпродвинутая тема: просто знай, что она есть. Полупрозрачные облака — «самостоятельные».</div>
 <script>
 const A = t => ({adv:true,t});
 const DATA = [
