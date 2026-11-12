@@ -5,8 +5,8 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Карта вайбкодинга</title>
 <style>
-:root{--bg:#eaf3fb;--cloud:#ffffff;--ink:#1d2a3a;--muted:#55657a;--adv:#0fb5ae;--accent:#4a6cf7;--orphan:#fff7e6}
-@media (prefers-color-scheme:dark){:root{--bg:#0f1622;--cloud:#1c2636;--ink:#e6edf6;--muted:#9fb0c6;--adv:#2fe0d6;--accent:#8aa2ff;--orphan:#2a2618}}
+:root{--bg:#eaf3fb;--cloud:#ffffff;--ink:#1d2a3a;--muted:#55657a;--adv:#0fb5ae;--accent:#4a6cf7;--ghost:#ffffff;--ghostline:#8fb0e8}
+@media (prefers-color-scheme:dark){:root{--bg:#0f1622;--cloud:#1c2636;--ink:#e6edf6;--muted:#9fb0c6;--adv:#2fe0d6;--accent:#8aa2ff;--ghost:#2e4263;--ghostline:#7d9fe0}}
 *{box-sizing:border-box}
 html,body{margin:0;height:100%;overflow:hidden;background:var(--bg);color:var(--ink);font-family:system-ui,"Segoe UI",Roboto,sans-serif}
 #viewport{position:fixed;inset:0;cursor:grab;touch-action:none;user-select:none}
@@ -16,14 +16,17 @@ html,body{margin:0;height:100%;overflow:hidden;background:var(--bg);color:var(--
 .big{position:absolute;width:1500px;padding:110px 80px 80px;isolation:isolate}
 .cbg{position:absolute;z-index:-1;overflow:visible;pointer-events:none}
 .big>.cbg{filter:drop-shadow(0 30px 40px rgba(40,70,120,.18));transition:filter .3s}
-.big .cbg g{fill:var(--cloud)}
-.big.orphan>.cbg g{fill:var(--cloud);opacity:.45}
-.big.hl>.cbg{filter:drop-shadow(0 0 60px var(--accent)) drop-shadow(0 0 20px var(--accent))}
+.big .cbg .body{fill:var(--cloud)}
+.big.orphan>.cbg{filter:none}
+.big.orphan>.cbg .body{fill:var(--ghost);opacity:.28}
+.cbg .ol{fill:#000;filter:url(#cloudOutline)}
+#olFlood{flood-color:var(--ghostline)}
+.big.hl>.cbg,.big.orphan.hl>.cbg{filter:drop-shadow(0 0 60px var(--accent)) drop-shadow(0 0 20px var(--accent))}
 .big h2{margin:0 0 50px;text-align:center;font-size:150px;line-height:1;letter-spacing:-2px;cursor:pointer}
 .big .sub{text-align:center;font-size:44px;color:var(--muted);margin:-30px 0 50px}
 .kids{display:flex;flex-wrap:wrap;align-items:flex-start;justify-content:center;transition:opacity .3s}
 .kid{width:400px;padding:34px 40px;position:relative;isolation:isolate}
-.kid>.cbg g{fill:var(--bg)}
+.kid>.cbg .body{fill:var(--bg)}
 .kid.adv>.cbg{display:none}
 .kid h3{margin:0 0 12px;font-size:30px}
 .kid p{margin:0;font-size:20px;line-height:1.45;color:var(--ink)}
@@ -62,9 +65,10 @@ code{background:rgba(74,108,247,.12);padding:0 6px;border-radius:6px;font-size:.
 </style>
 </head>
 <body>
+<svg width="0" height="0" style="position:absolute"><filter id="cloudOutline" x="-5%" y="-5%" width="110%" height="110%"><feMorphology in="SourceAlpha" operator="dilate" radius="7" result="d"/><feComposite in="d" in2="SourceAlpha" operator="out" result="ring"/><feFlood id="olFlood"/><feComposite in2="ring" operator="in"/></filter></svg>
 <div id="viewport"><div id="world"></div></div>
 <div id="hud"><button id="zin">＋</button><button id="zout">－</button><button id="home">Обзор всей карты</button></div>
-<div id="legend">Колесо мыши / щипок — масштаб, перетаскивание — перемещение. Клик по большому облаку — приблизить.<br><b class="a">Бирюзовая пунктирная рамка</b> — суперпродвинутая тема: просто знай, что она есть. Полупрозрачные облака — «самостоятельные».</div>
+<div id="legend">Колесо мыши / щипок — масштаб, перетаскивание — перемещение. Клик по большому облаку — приблизить.<br><b class="a">Бирюзовая пунктирная рамка</b> — суперпродвинутая тема: просто знай, что она есть. Облака с контуром (outline) — «самостоятельные».</div>
 <script>
 const A = t => ({adv:true,t});
 const DATA = [
@@ -247,7 +251,7 @@ function cloudify(el,seed,big){
   const svg=document.createElementNS('http://www.w3.org/2000/svg','svg');
   svg.setAttribute('class','cbg');svg.setAttribute('width',w+2*m);svg.setAttribute('height',h+2*m);
   svg.style.left=-m+'px';svg.style.top=-m+'px';
-  svg.innerHTML=`<g transform="translate(${m},${m})">${c}</g>`;
+  svg.innerHTML=`<g transform="translate(${m},${m})">${el.classList.contains("orphan")?`<g class="ol">${c}</g>`:""}<g class="body">${c}</g></g>`;
   el.prepend(svg);
   return ext;
 }
