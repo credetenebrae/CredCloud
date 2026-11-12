@@ -37,7 +37,12 @@ html,body{margin:0;height:100%;overflow:hidden;background:var(--bg);color:var(--
 code{background:rgba(74,108,247,.12);padding:0 6px;border-radius:6px;font-size:.92em}
 #hud{position:fixed;left:16px;bottom:16px;display:flex;gap:8px;z-index:5;flex-wrap:wrap}
 #hud button{border:0;border-radius:999px;padding:10px 16px;background:var(--cloud);color:var(--ink);font-size:15px;box-shadow:0 4px 14px rgba(0,0,0,.15);cursor:pointer}
-#legend{position:fixed;right:16px;top:16px;max-width:300px;background:var(--cloud);padding:12px 16px;border-radius:18px;font-size:13px;line-height:1.5;box-shadow:0 4px 14px rgba(0,0,0,.15);z-index:5}
+#legend{position:fixed;right:16px;top:16px;width:300px;max-height:400px;background:var(--cloud);padding:12px 16px 26px;border-radius:18px;font-size:13px;line-height:1.5;box-shadow:0 4px 14px rgba(0,0,0,.15);z-index:5;overflow:hidden;transition:width .35s ease,max-height .35s ease,padding .35s ease,border-radius .35s ease}
+#legend .lt{width:268px;transition:opacity .2s}
+#ldot{position:absolute;right:9px;bottom:9px;width:14px;height:14px;padding:0;border:0;border-radius:50%;background:var(--accent);cursor:pointer;transition:transform .2s}
+#ldot:hover{transform:scale(1.25)}
+#legend.min{width:32px;max-height:32px;padding:0;border-radius:50%}
+#legend.min .lt{opacity:0}
 #legend b.a{color:var(--adv)}
 #legend b.o{color:var(--ghostline)}
 #links{position:absolute;left:0;top:0;pointer-events:none;overflow:visible;z-index:10}
@@ -69,7 +74,7 @@ code{background:rgba(74,108,247,.12);padding:0 6px;border-radius:6px;font-size:.
 <svg width="0" height="0" style="position:absolute"><filter id="cloudOutline" x="-5%" y="-5%" width="110%" height="110%"><feMorphology in="SourceAlpha" operator="dilate" radius="7" result="d"/><feComposite in="d" in2="SourceAlpha" operator="out" result="ring"/><feFlood id="olFlood"/><feComposite in2="ring" operator="in"/></filter></svg>
 <div id="viewport"><div id="world"></div></div>
 <div id="hud"><button id="zin">＋</button><button id="zout">－</button><button id="home">Обзор всей карты</button></div>
-<div id="legend">Колесо мыши / щипок — масштаб, перетаскивание — перемещение. Клик по большому облаку — приблизить.<br><b class="a">Фиолетовая пунктирная рамка</b> — суперпродвинутая тема: просто знай, что она есть. Облака с <b class="o">контуром</b> (outline) — «самостоятельные».</div>
+<div id="legend"><div class="lt">Колесо мыши / щипок — масштаб.<br>Перетаскивание — перемещение.<br>Клик по большому облаку — приблизить.<br><b class="a">Фиолетовая пунктирная рамка</b> — суперпродвинутая тема: просто знай, что она есть.<br>Облака с <b class="o">контуром</b> (outline) — «самостоятельные».</div><button id="ldot" aria-label="Скрыть или показать подсказку" title="Скрыть / показать"></button></div>
 <script>
 const A = t => ({adv:true,t});
 const DATA = [
@@ -325,6 +330,11 @@ road.querySelectorAll('.num').forEach(n=>{
 });
 vp.addEventListener('wheel',closePop);
 vp.addEventListener('pointerdown',e=>{if(!e.target.closest('.num'))closePop()});
+
+// подсказка сворачивается в точку
+const legend=document.getElementById('legend');
+try{if(localStorage.getItem('legendMin')==='1')legend.classList.add('min')}catch(e){}
+document.getElementById('ldot').onclick=()=>{const m=legend.classList.toggle('min');try{localStorage.setItem('legendMin',m?'1':'0')}catch(e){}};
 
 let s=1,x=0,yy=0;
 function apply(anim){world.classList.toggle('noanim',!anim);world.style.transform=`translate(${x}px,${yy}px) scale(${s})`;
