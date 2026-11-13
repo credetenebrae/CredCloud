@@ -1,1 +1,559 @@
-<!doctype html><meta charset="utf-8"><meta http-equiv="refresh" content="0; url=vibecoding-map.html"><title>Карта вайбкодинга</title><a href="vibecoding-map.html">Карта вайбкодинга</a>
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>CredCloud</title>
+<!-- favicon: вариант B «Облако в плашке» из Figma (node 13:63) -->
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2064%2064%22%3E%3Crect%20width%3D%2264%22%20height%3D%2264%22%20rx%3D%2214%22%20fill%3D%22%2326344D%22%2F%3E%3Cpath%20d%3D%22M19%2048H46C48.6934%2047.8719%2051.246%2046.7589%2053.1727%2044.8725C55.0995%2042.986%2056.2662%2040.4576%2056.4513%2037.7675C56.6364%2035.0774%2055.827%2032.413%2054.1768%2030.2805C52.5265%2028.148%2050.1505%2026.6958%2047.5%2026.2C46.8256%2023.2083%2045.2504%2020.4952%2042.9866%2018.4263C40.7229%2016.3574%2037.8793%2015.032%2034.8392%2014.6289C31.799%2014.2257%2028.7084%2014.7641%2025.9836%2016.1714C23.2588%2017.5788%2021.0309%2019.7875%2019.6%2022.5C16.4%2022.6977%2013.3907%2024.0892%2011.1673%2026.3991C8.94392%2028.7091%207.66838%2031.7693%207.59296%2034.9745C7.51754%2038.1798%208.64774%2041.2966%2010.76%2043.7086C12.8723%2046.1205%2015.8128%2047.652%2019%2048Z%22%20fill%3D%22%23EEF3FA%22%2F%3E%3C%2Fsvg%3E">
+<script>
+// Состояние подсказки (свёрнута / вкладка) читаем до первой отрисовки, чтобы панель не мигала.
+// Хранится в cookie; localStorage — запасной вариант для file://, где браузер cookie не сохраняет.
+function prefGet(k){const m=document.cookie.match('(?:^|; )'+k+'=([^;]*)');if(m)return decodeURIComponent(m[1]);try{return localStorage.getItem(k)}catch(e){return null}}
+function prefSet(k,v){document.cookie=k+'='+encodeURIComponent(v)+'; max-age=31536000; path=/; SameSite=Lax';try{localStorage.setItem(k,v)}catch(e){}}
+document.documentElement.classList.toggle('legend-min',prefGet('legend')==='min');
+document.documentElement.dataset.tab=prefGet('legendTab')==='ver'?'ver':'help';
+</script>
+<style>
+:root{--bg:#eaf3fb;--cloud:#ffffff;--ink:#1d2a3a;--muted:#55657a;--adv:#8b5cf6;--accent:#4a6cf7;--ghost:#ffffff;--ghostline:#8fb0e8;--ui:#26344d;--ui-ink:#eef3fa;--ui-line:rgba(255,255,255,.12);--add:#22a06b;--mod:#d99a00;--del:#e5484d}
+@media (prefers-color-scheme:dark){:root{--bg:#0f1622;--cloud:#1c2636;--ink:#e6edf6;--muted:#9fb0c6;--adv:#b79cff;--accent:#8aa2ff;--ghost:#2e4263;--ghostline:#7d9fe0;--ui:#3a4868;--ui-ink:#f2f5fb;--ui-line:rgba(255,255,255,.14);--add:#4cc38a;--mod:#f5c451;--del:#ff6b6b}}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;overflow:hidden;background:var(--bg);color:var(--ink);font-family:system-ui,"Segoe UI",Roboto,sans-serif}
+#viewport{position:fixed;inset:0;cursor:grab;touch-action:none;user-select:none}
+#viewport.drag{cursor:grabbing}
+#world{position:absolute;left:0;top:0;transform-origin:0 0;transition:transform .5s ease}
+#world.noanim{transition:none}
+.big{position:absolute;width:1500px;isolation:isolate}
+.big .head{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:0 110px;transition:opacity .25s}
+.big .head h2{margin:0;font-size:170px}
+.big .head .sub{margin:28px 0 0;font-size:50px}
+.cbg{position:absolute;z-index:-1;overflow:visible;pointer-events:none}
+.big>.cbg{filter:drop-shadow(0 30px 40px rgba(40,70,120,.18));transition:filter .3s}
+.big .cbg .body{fill:var(--cloud)}
+.big.orphan>.cbg{filter:none}
+.big.orphan>.cbg .body{fill:var(--ghost);opacity:.28}
+.cbg .ol{fill:#000;filter:url(#cloudOutline)}
+#olFlood{flood-color:var(--ghostline)}
+.big.hl>.cbg,.big.orphan.hl>.cbg{filter:drop-shadow(0 0 60px var(--accent)) drop-shadow(0 0 20px var(--accent))}
+.big h2{margin:0 0 50px;text-align:center;font-size:150px;line-height:1;letter-spacing:-2px;cursor:pointer}
+.big .sub{text-align:center;font-size:44px;color:var(--muted);margin:-30px 0 50px}
+.kids{display:flex;flex-wrap:wrap;align-items:flex-start;justify-content:center}
+.big .kids{position:absolute;left:0;top:0;transform-origin:0 0;opacity:0;visibility:hidden;transition:opacity .25s}
+.big.show .kids{visibility:visible}
+.road .kids{display:none}
+.kid{width:400px;padding:34px 40px;position:relative;isolation:isolate}
+.kid>.cbg .body{fill:var(--bg)}
+.kid.adv>.cbg{display:none}
+.kid h3{margin:0 0 12px;font-size:30px}
+.kid p{margin:0;font-size:20px;line-height:1.45;color:var(--ink);display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:5;overflow:hidden}
+.kid.clipped{cursor:pointer}
+.kid.clipped::after{content:"Читать целиком →";display:block;margin-top:10px;font-size:18px;font-weight:600;color:var(--accent)}
+.kid.clipped:hover h3{color:var(--accent)}
+#reader{border:1px solid color-mix(in srgb,var(--ghostline) 45%,transparent);position:fixed;z-index:30;display:none;width:min(440px,calc(100vw - 24px));max-height:min(70vh,560px);overflow:auto;padding:20px 22px 22px;border-radius:20px;background:var(--cloud);color:var(--ink);box-shadow:0 18px 50px rgba(15,30,60,.35);font-size:16px;line-height:1.6}
+#reader.open{display:block;animation:rin .16s ease-out}
+@keyframes rin{from{opacity:0;transform:translateY(6px)}}
+#reader .rcloud{font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-right:30px}
+#reader h3{margin:4px 30px 10px 0;font-size:21px;line-height:1.3}
+#reader p{margin:0}
+#reader .rclose{position:absolute;right:12px;top:10px;width:30px;height:30px;border:0;border-radius:50%;background:var(--bg);color:var(--ink);font-size:20px;line-height:1;cursor:pointer}
+.kid ul{margin:6px 0 0;padding-left:22px;font-size:20px;line-height:1.45}
+.kid.adv{background:transparent;border:3px dashed var(--adv);padding:26px 40px}
+.kid.adv h3{color:var(--adv);margin:0}
+code{background:rgba(74,108,247,.12);padding:0 6px;border-radius:6px;font-size:.92em}
+#hud{position:fixed;left:16px;bottom:16px;display:flex;gap:8px;z-index:5;flex-wrap:wrap}
+#hud button{border:1px solid var(--ui-line);border-radius:999px;padding:10px 16px;background:var(--ui);color:var(--ui-ink);font-size:15px;box-shadow:0 4px 14px rgba(0,0,0,.15);cursor:pointer}
+#legend{position:fixed;right:16px;top:16px;width:300px;max-height:400px;background:var(--ui);color:var(--ui-ink);border:1px solid var(--ui-line);padding:12px 16px 14px;border-radius:18px;font-size:13px;line-height:1.5;box-shadow:0 4px 14px rgba(0,0,0,.15);z-index:5;overflow:hidden;transition:width .35s ease,max-height .35s ease,padding .35s ease,border-radius .35s ease}
+#legend .lt{width:268px;transition:opacity .18s ease .17s} /* раскрытие: сначала панель растёт, потом проявляется текст */
+#legend{max-height:600px}
+.tabs{display:flex;gap:4px;padding:3px;margin-bottom:10px;border-radius:999px;background:rgba(255,255,255,.08);width:max-content}
+.tabs button{border:0;border-radius:999px;padding:5px 12px;background:none;color:var(--ui-ink);font:12px system-ui,"Segoe UI",sans-serif;cursor:pointer}
+html[data-tab=help] .tabs [data-tab=help],html[data-tab=ver] .tabs [data-tab=ver]{background:var(--accent);font-weight:600}
+#legend .pane{display:none}
+html[data-tab=help] #legend [data-pane=help],html[data-tab=ver] #legend [data-pane=ver]{display:block}
+.vhead{opacity:.75;margin-bottom:6px}
+#vlist{scrollbar-width:thin;scrollbar-color:rgba(255,255,255,.28) transparent;max-height:320px;overflow:auto;margin:0 -6px;padding:0 6px}
+#vlist::-webkit-scrollbar{width:8px}
+#vlist::-webkit-scrollbar-track{background:transparent}
+#vlist::-webkit-scrollbar-thumb{background:rgba(255,255,255,.22);border-radius:999px;border:2px solid var(--ui)}
+#vlist::-webkit-scrollbar-thumb:hover{background:rgba(255,255,255,.38)}
+#vlist::-webkit-scrollbar-button{display:none;height:0}
+.vrow{display:flex;gap:10px;align-items:flex-start;padding:6px 8px;border-radius:10px;cursor:pointer}
+.vrow:hover{background:rgba(255,255,255,.05)}.vrow.on{background:rgba(255,255,255,.09)}
+.vrow.br{border-left:3px solid var(--c);border-radius:0 10px 10px 0;margin-left:12px}
+.vbr{margin-bottom:8px}
+.vhead2{padding-left:4px}
+.vrow .hd{display:inline;margin-left:6px;font-size:10px;padding:0 5px;border-radius:4px;background:var(--c);color:#fff;opacity:1}
+.vrow code{font:600 12px ui-monospace,Consolas,monospace}
+.vrow .rec{font-size:11px;font-weight:600;color:#ffd166}
+.vrow .chip{display:inline-block;margin-left:6px;padding:0 7px;border-radius:999px;font-size:11px;color:#fff;background:var(--c)}
+.vrow input{accent-color:var(--accent);margin:3px 0 0}
+.vrow small{display:block;opacity:.75}
+.vrow a{color:var(--ghostline);font-size:12px}
+#ldot{position:absolute;right:8px;top:8px;width:14px;height:14px;padding:0;border:0;border-radius:50%;background:var(--accent);cursor:pointer;transition:transform .2s}
+#ldot:hover{transform:scale(1.25)}
+html.legend-min #legend{width:32px;max-height:32px;padding:0;border-radius:16px} /* 16px, а не 50%: радиус меняется плавно и не режет содержимое на полпути */
+html.legend-min #legend .lt{opacity:0;transition:opacity .12s ease} /* сворачивание: текст гаснет сразу, до того как панель сожмётся */
+/* точка: right/top 8px — центр кружка 32px (рамка 2×1px → 30px внутри: (30−14)/2 = 8), и это же место в раскрытой панели */
+#legend b.a{color:#c4b0ff}
+#legend b.o{color:var(--ghostline)}
+#links{position:absolute;left:0;top:0;pointer-events:none;overflow:visible;z-index:10}
+#links path{fill:none;stroke:var(--accent);stroke-width:10;stroke-dasharray:30 24;stroke-linecap:round;animation:dash 1s linear infinite}
+@keyframes dash{to{stroke-dashoffset:-54}}
+.road{width:auto;height:auto}
+.road h2{font-size:170px}
+.steps{display:grid;grid-template-columns:repeat(4,1fr);gap:60px 70px}
+.step{position:relative;padding-left:170px;font-size:24px;line-height:1.5}
+.num{position:absolute;left:0;top:0;width:140px;height:140px;border-radius:50%;background:var(--accent);color:#fff;font-size:72px;font-weight:700;display:flex;align-items:center;justify-content:center;cursor:help;transition:transform .2s}
+.num:hover{transform:scale(1.12)}
+.step h3{margin:0 0 6px;font-size:40px}
+.step .when{color:var(--muted);font-size:22px;margin-bottom:10px}
+.step .goal{font-weight:600;margin:8px 0}
+.step ul{margin:6px 0;padding-left:28px}
+.step a{color:var(--accent)}
+#pop{position:fixed;z-index:20;display:none;flex-direction:column;align-items:flex-start;gap:10px;padding:18px 22px 22px;background:var(--cloud);border-radius:28px;box-shadow:0 12px 40px rgba(0,0,0,.25);max-width:340px}
+#pop.open{display:flex}
+#pop .pt{font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.mini{position:relative;isolation:isolate;border:0;cursor:pointer;font:600 15px system-ui,"Segoe UI",sans-serif;color:var(--ink);background:var(--bg);padding:12px 20px;border-radius:999px;margin:8px 0 0 4px;transition:transform .15s,background .15s;text-align:left}
+.mini::before,.mini::after{content:"";position:absolute;z-index:-1;background:inherit;border-radius:50%}
+.mini::before{width:34px;height:34px;left:14px;top:-12px}
+.mini::after{width:26px;height:26px;left:40px;top:-8px}
+.mini:hover{transform:translateX(4px);background:var(--accent);color:var(--bg)}
+.step .to{font-size:20px;color:var(--muted);margin-top:10px}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute"><filter id="cloudOutline" x="-5%" y="-5%" width="110%" height="110%"><feMorphology in="SourceAlpha" operator="dilate" radius="7" result="d"/><feComposite in="d" in2="SourceAlpha" operator="out" result="ring"/><feFlood id="olFlood"/><feComposite in2="ring" operator="in"/></filter></svg>
+<div id="viewport"><div id="world"></div></div>
+<div id="hud"><button id="zin">＋</button><button id="zout">－</button><button id="home">Обзор всей карты</button></div>
+<div id="legend"><div class="lt"><div class="tabs"><button data-tab="help">Подсказка</button><button data-tab="ver">Версии</button></div><div class="pane" data-pane="help">Колесо мыши / щипок — масштаб.<br>Перетаскивание — перемещение.<br>Клик по большому облаку — приблизить.<br><b class="a">Фиолетовая пунктирная рамка</b> — продвинутая тема: просто знай, что она есть.<br>Облака с <b class="o">контуром</b> (outline) — «самостоятельные».</div><div class="pane" data-pane="ver"><div class="vhead">Активная версия: <b id="vcur"></b></div><div id="vlist"></div></div></div><button id="ldot" aria-label="Скрыть или показать подсказку" title="Скрыть / показать"></button></div>
+<script>
+const A = t => ({adv:true,t});
+const DATA = [
+{t:"Основы ИИ",s:"что вообще такое LLM",k:[
+ ["Что такое LLM","Большая языковая модель (Claude, GPT, Gemini) предсказывает следующий кусок текста. Она не «знает» твой проект, пока ты не покажешь ей файлы или не опишешь задачу."],
+ ["Токены","Модель читает и пишет токенами — кусочками слов (~3–4 символа англ., русский «дороже»). Всё измеряется в токенах: лимиты, скорость, цена."],
+ ["Контекстное окно","Сколько токенов модель «держит в голове» за раз: твои сообщения, файлы, ответы. Когда окно переполняется, старое сжимается или забывается — поэтому длинные чаты деградируют."],
+ ["Галлюцинации","Модель может уверенно выдумать функцию, библиотеку или API. Лекарство: проверять запуском, просить ссылки на документацию, давать актуальные доки в контекст."],
+ ["Модели и их размеры","Большие (Opus) — умнее, медленнее, дороже. Средние (Sonnet) — рабочая лошадка. Маленькие (Haiku) — быстрые и дешёвые для простых задач. Выбирай под задачу."],
+ ["Чат vs агент","Чат — отвечает текстом. Агент — сам читает файлы, запускает команды, правит код в цикле, пока задача не готова. Вайбкодинг = работа с агентом."],
+ A("Как устроены трансформеры / attention"),A("Temperature, top-p и параметры сэмплинга"),A("Reasoning / extended thinking под капотом")]},
+{t:"Промптинг",s:"как разговаривать с ИИ",k:[
+ ["Контекст → задача → критерий","Хороший промпт: что за проект и где файлы; что сделать; как понять что готово. «В src/Header.tsx добавь мобильное меню-бургер, на ширине < 768px, анимация открытия 200мс»."],
+ ["Конкретика вместо «сделай красиво»","Называй цвета, отступы, референсы, библиотеки. «Как у Linear: тёмный фон, тонкие границы 1px, шрифт Inter». Чем точнее — тем меньше переделок."],
+ ["Маленькие шаги","Не «сделай весь сайт», а «сначала шапку», «теперь карточки товаров». Каждый шаг проверяй глазами в браузере, потом коммить."],
+ ["Показывай, а не описывай","Скриншот бага, картинка макета, ссылка на Figma, текст ошибки из консоли целиком. Агент видит изображения."],
+ ["Сначала план","«Не пиши код, сначала предложи план» — дешёвый способ поймать неверное понимание задачи до того, как потрачены токены на код."],
+ ["Ограничения","Говори что НЕ трогать: «не меняй API», «не добавляй новые зависимости», «только CSS»."],
+ ["Обратная связь","Если результат плохой — объясни ЧТО не так, а не «переделай». Если ушло совсем не туда — откати и начни заново с лучшим промптом, это дешевле."],
+ ["Язык","Можно писать по-русски — модели понимают отлично. Имена файлов и терминов оставляй как в коде."]]},
+{t:"Инструменты",s:"где вайбкодить",k:[
+ ["Claude Code","Агент в терминале / десктоп-приложении / IDE. Работает прямо с файлами на твоём ПК, запускает команды, поддерживает скиллы, MCP, хуки."],
+ ["Cursor, Windsurf","Редакторы кода (на базе VS Code) со встроенным ИИ-агентом. Удобно видеть код и правки рядом."],
+ ["GitHub Copilot","Автодополнение и агент внутри VS Code / JetBrains."],
+ ["v0, Lovable, Bolt","Браузерные генераторы: описал — получил готовый сайт с превью. Отлично для старта и прототипов, сложнее для больших проектов."],
+ ["Что выбрать новичку","Начни с одного: например Claude Code + VS Code. Не прыгай между десятью тулами — навык промптинга переносится, а время на освоение — нет."]]},
+{t:"Скиллы (Skills)",s:"пакеты инструкций для агента",k:[
+ ["Что это","Папка с файлом <code>SKILL.md</code> (+ опционально скрипты, шаблоны, примеры). Внутри — инструкция «как делать задачу X хорошо». Агент подгружает её, когда задача подходит."],
+ ["Как работают","В контексте висит только короткое описание скилла. Когда задача совпадает — агент загружает полный текст. Так экономится контекст: 50 скиллов не съедают окно."],
+ ["Зачем нужны","Чтобы не повторять одно и то же в каждом промпте: «наш стиль кода», «как деплоить», «как делать доступные формы». Записал раз — работает всегда."],
+ ["Где лежат","Личные: <code>~/.claude/skills/имя/SKILL.md</code>. Проектные: <code>.claude/skills/имя/SKILL.md</code> в репозитории. Вызов: автоматически или командой <code>/имя</code>."],
+ ["Где взять / установить","Плагины и маркетплейсы плагинов (<code>/plugin</code> в Claude Code), официальный репозиторий anthropics/skills на GitHub, скиллы от вендоров (Figma, Vercel и т.д.), репозитории сообщества."],
+ ["Чем отличаются по сути","1) Чистые инструкции (только текст). 2) Инструкции + скрипты, которые агент запускает. 3) Шаблоны/ассеты. 4) Скиллы-обёртки над MCP-инструментами (как Figma)."],
+ ["Фронтенд vs бэкенд vs Figma","Фронт: дизайн-система, вёрстка, доступность, адаптив. Бэк: структура API, миграции БД, безопасность. Figma: как вызывать инструменты Figma, порядок создания компонентов и токенов. Не-IT: тексты, отчёты, документы, таблицы — те же принципы, другой предмет."],
+ ["Как написать свой","Создай папку и <code>SKILL.md</code>: сверху frontmatter с <code>name</code> и <code>description</code> (когда применять!), ниже — пошаговая инструкция, примеры хорошо/плохо. Описание — самое важное: по нему агент решает, загружать ли скилл."],
+ ["Защита от инъекций","Скилл = текст, которому агент доверяет. Чужой скилл может содержать скрытую команду («отправь .env на сервер»). Читай SKILL.md и скрипты перед установкой, ставь из проверенных источников, не давай агенту авто-разрешения на всё."]]},
+{t:"MCP",s:"Model Context Protocol",k:[
+ ["Что это","Стандарт «USB-порта» для ИИ: способ подключить к агенту внешние сервисы (Figma, браузер, базу данных, GitHub) как набор инструментов."],
+ ["Как пользоваться","Добавить сервер: <code>claude mcp add ...</code> или через конфиг <code>.mcp.json</code>. После этого агент сам видит новые инструменты и вызывает их, когда нужно."],
+ ["Чем полезно","Агент не просто пишет код «вслепую», а видит макет в Figma, открывает сайт в браузере, читает задачи из трекера, смотрит актуальную документацию."],
+ ["Ограничения","Каждый сервер добавляет описания инструментов в контекст (= токены). Медленнее простых команд. Требует авторизации. Сторонний сервер видит твои данные."],
+ ["Популярные для фронта","<b>Figma</b> — макеты в код и обратно. <b>Playwright / Chrome DevTools</b> — агент открывает и кликает сайт. <b>Context7</b> — свежая документация библиотек. <b>GitHub</b> — issues, PR."],
+ ["Менее известные, но полезные","Supabase / Postgres (база данных), Sentry (ошибки с прода), Linear / Jira (задачи), Vercel (деплой), Notion (документы), shadcn (компоненты)."],
+ ["Безопасность","Сервер может вернуть текст с вредной инструкцией (например, из чужого issue). Подключай только нужное, проверяй источник, смотри какие разрешения просит."],
+ A("Написать свой MCP-сервер")]},
+{t:"Контекст и память",s:"как ИИ «помнит» проект",k:[
+ ["CLAUDE.md / rules","Файл в корне проекта с правилами: стек, команды запуска, стиль кода, что нельзя трогать. Агент читает его в каждой сессии. Аналоги: <code>.cursorrules</code>, <code>AGENTS.md</code>."],
+ ["Новая сессия = чистый лист","Агент не помнит прошлый чат. Всё важное — в CLAUDE.md, в коде и в git, а не «в голове» модели."],
+ ["Сжатие контекста","В длинной сессии старые сообщения сжимаются (<code>/compact</code>). Для новой задачи лучше <code>/clear</code> — меньше мусора, точнее ответы, дешевле."],
+ ["Давай нужные файлы","Ссылайся на конкретные файлы (<code>@src/App.tsx</code>), а не «посмотри весь проект» — экономит токены и внимание модели."],
+ A("RAG и векторные базы")]},
+{t:"Оркестрация и экономия токенов",s:"агенты, субагенты, модели",k:[
+ ["Субагенты","Главный агент поручает подзадачу отдельному агенту с чистым контекстом (например, «найди все места где используется кнопка»). Мусор от поиска не засоряет основной чат."],
+ ["Модель под задачу","Простое (переименовать, найти) — дешёвая быстрая модель. Архитектура, сложный баг — сильная. Переключение: <code>/model</code>."],
+ ["Plan mode","Сначала агент только читает и предлагает план, ничего не меняя. Ты правишь план — потом выполнение. Меньше переделок = меньше токенов."],
+ ["Prompt caching","Повторяющееся начало контекста кэшируется и стоит в разы дешевле. Работает само, но длинные паузы и частая смена контекста ломают кэш."],
+ ["Гигиена","<code>/clear</code> между задачами, не вставлять огромные логи целиком, отключать ненужные MCP, держать CLAUDE.md коротким."],
+ A("Multi-agent системы и Agent SDK"),A("Параллельные агенты в git worktrees")]},
+{t:"Биллинг",s:"сколько это стоит",k:[
+ ["Подписка","Pro / Max / Team у Claude, аналоги у Cursor и др. Фиксированная цена в месяц + лимиты использования, которые обновляются по окнам времени."],
+ ["Оплата по API","Платишь за каждый токен: входные дешевле, выходные дороже, кэшированные — сильно дешевле. Удобно для автоматизации, может выйти дорого при активном вайбкодинге."],
+ ["Что «стоит» запрос","Агент за одну твою просьбу делает много вызовов: читает файлы, запускает команды. Каждый шаг пересылает весь контекст. Длинный чат = дорогой каждый следующий шаг."],
+ ["Как следить","<code>/cost</code>, <code>/usage</code> в Claude Code, дашборд в консоли провайдера. Ставь лимиты расходов на API-ключ."],
+ ["Совет новичку","Начни с подписки — предсказуемо и не страшно. API подключай, когда поймёшь свои объёмы."]]},
+{t:"Опыт разработчика + ИИ",k:[
+ ["Ты — ревьюер и архитектор","ИИ пишет быстро, но решения принимаешь ты: структура, границы компонентов, стейт. Твой опыт = умение отличить рабочий код от правдоподобного."],
+ ["Делегируй рутину","Бойлерплейт, формы, типы из API, тесты, рефакторинг по шаблону — идеально для агента. Сложную бизнес-логику проверяй построчно."],
+ ["Промпт как тикет","Пиши задачу как хороший тикет для джуна: контекст, acceptance criteria, файлы-образцы («сделай как в UserCard.tsx»)."],
+ ["Стек, который ИИ знает лучше","React/Next.js, TypeScript, Tailwind, shadcn/ui — лучшее качество генерации. Нишевые/свежие либы — давай доки (Context7 MCP)."],
+ ["Типы как страховка","Строгий TypeScript + линтер: агент сам видит ошибки компиляции и чинит их в цикле. Чем строже проект, тем лучше работает вайбкодинг."],
+ ["Ловушки для опытных","Не принимай большие диффы не читая. ИИ любит лишние абстракции, дубли и выдуманные API. Проси «минимальный дифф, без новых зависимостей»."],
+ ["Чекпоинты и git","Коммит перед задачей, ревью через <code>git diff</code>. У агента есть свои откаты (<code>/rewind</code>). Ветки, коммиты и PR через <code>gh</code> он делает сам."],
+ A("Агенты в CI: авто-ревью PR и фиксы по issue")]},
+{t:"Git и деплой",s:"что меняется с агентом",k:[
+ ["Зачем git вайбкодеру","ИИ может сломать то, что работало. Коммит после каждого удачного шага = можно откатиться в один клик. Это обязательно."],
+ ["Минимум команд","<code>git init</code>, <code>git add .</code>, <code>git commit -m \"...\"</code>, <code>git log</code>, откат. Агент сам умеет делать коммиты — просто попроси."],
+ ["GitHub","Хранение кода в облаке, история, совместная работа, Pull Requests."],
+ ["Деплой","Vercel, Netlify, Cloudflare Pages: подключил репозиторий — сайт сам публикуется после каждого push. Бесплатно для старта."],
+ ["Секреты","API-ключи — в <code>.env</code>, а <code>.env</code> — в <code>.gitignore</code>. Никогда не коммить ключи."],
+ A("CI/CD пайплайны и GitHub Actions")]},
+{t:"Автотесты",s:"как проверить, что ИИ ничего не сломал",k:[
+ ["Зачем","ИИ правит одно — ломает другое. Тесты ловят это автоматически, а агент может сам запускать их и чинить код, пока всё не позеленеет."],
+ ["Unit-тесты","Vitest / Jest — проверяют отдельные функции и компоненты. Проси: «напиши тесты на эту функцию и запусти»."],
+ ["E2E-тесты","Playwright — открывает настоящий браузер, кликает по сайту как пользователь. Самые полезные для фронта."],
+ ["Визуальная проверка","Агент через Playwright/Chrome MCP делает скриншот и сам смотрит, совпадает ли с макетом."],
+ ["Линтеры и типы","ESLint, TypeScript — ловят ошибки ещё до запуска. Попроси агента запускать их после правок."],
+ A("TDD с агентом и eval-наборы")]},
+{t:"Безопасность",s:"о чём помнить с первого дня",k:[
+ ["Prompt injection","Вредная инструкция, спрятанная в веб-странице, файле, issue или скилле. Агент может её выполнить. Не давай агенту доступ к тому, что жалко потерять."],
+ ["Разрешения","Агент спрашивает перед опасными действиями. Не нажимай «разрешить всё» не читая. Режимы разрешений настраиваются в settings."],
+ ["Секреты","Не вставляй пароли и ключи в чат. Не давай агенту читать .env без нужды."],
+ ["Чужой код и пакеты","ИИ может предложить несуществующий или вредоносный npm-пакет. Проверяй название и популярность пакета."],
+ ["Ревью перед публикацией","Перед деплоем попроси агента сделать security review — и посмотри сам, что уходит в интернет."]]},
+{t:"Дизайн → код",s:"Figma и визуал",k:[
+ ["Figma MCP","Агент читает макет по ссылке: цвета, отступы, компоненты — и верстает близко к оригиналу."],
+ ["Скриншот как ТЗ","Нет макета? Кинь скриншот понравившегося сайта и скажи, что взять оттуда."],
+ ["Дизайн-токены","Цвета, шрифты, отступы как переменные. Попроси ИИ завести их в начале — потом весь сайт выглядит единообразно."],
+ ["Обратно в Figma","Можно отправить сделанную страницу назад в Figma, чтобы дизайнер её поправил."]]},
+{t:"Хуки (Hooks)",o:1,k:[["Что это","Скрипты, которые запускаются автоматически на события агента: после правки файла — прогнать форматтер, перед командой — проверить её. Настраиваются в settings.json."]]},
+{t:"Slash-команды",o:1,k:[["Что это","Быстрые команды в чате: <code>/clear</code>, <code>/model</code>, <code>/compact</code>, <code>/cost</code>, <code>/init</code> (создаёт CLAUDE.md). Скиллы тоже вызываются как <code>/имя</code>."]]},
+{t:"Общие фишки",o:1,k:[
+ ["Попроси объяснить","«Объясни, что ты сделал, как новичку» — так ты учишься на каждом шаге."],
+ ["Попроси критику","«Что в этом коде плохо?» — ИИ хорошо ревьюит, в т.ч. свой же код."],
+ ["Не спорь с упрямством","Если ИИ 3 раза не справился — /clear и переформулируй задачу с нуля."],
+ ["Проверяй руками","«Готово» от ИИ — это гипотеза. Открой сайт и проверь сам."]]},
+{t:"Продвинутое",o:1,k:[
+ A("Локальные модели на своём ПК (Ollama, LM Studio)"),A("Fine-tuning моделей"),A("Свой агент на API / Agent SDK"),A("Computer use"),A("Self-hosted inference и квантование")]}
+];
+
+// ===== Версии контента: как в git =====
+// COMMITS — коммиты: набор правок к родителю (parent). id — короткий хеш (7 hex), title — сообщение коммита.
+//   branch — ветка, в которой коммит сделан (для меню версий; на карте правки не подсвечиваются).
+// BRANCHES — ветки: имя → {color, head}. head — последний коммит ветки.
+//   recommended:true — ровно у одной ветки: она открывается по умолчанию и стоит первой в меню.
+// date у коммита — 'ГГГГ-ММ-ДД ЧЧ:ММ'; по дате головы ветки меню сортирует остальные ветки (свежие выше).
+//   Продлить ветку: новый коммит с parent = текущий head ветки, потом head = id нового коммита.
+//   Новая ветка: новый коммит с parent = любой коммит (обычно head другой ветки) + новая запись в BRANCHES.
+// Правки (changes):
+//   {op:'add', cloud:'Облако', t:'Тема', x:'Текст'}          — новая тема (adv:true — продвинутая, без текста)
+//   {op:'mod', cloud:'Облако', t:'Тема', x:'Новый текст', nt:'Новое название'}  — x и nt необязательны
+//   {op:'del', cloud:'Облако', t:'Тема'}                     — убрать тему
+//   {op:'cloud', t:'Новое облако', s:'подзаголовок', o:1}    — новое большое облако (o:1 — самостоятельное)
+const BRANCHES={
+ 'основа':   {color:'#8fb0e8',head:'82add61'},
+ 'зелёная':  {color:'#22a06b',head:'0a67d21'},
+ 'оранжевая':{color:'#f97316',head:'c7972e6',recommended:true}
+};
+const COMMITS=[
+ {id:'82add61',date:'2026-11-13 02:04',parent:null,branch:'основа',title:"база — текущий сайт",src:'',changes:[]},
+ {id:'0a67d21',date:'2026-11-13 14:10',parent:'82add61',branch:'зелёная',title:"пример: хуки на практике, git для опытных",src:'https://docs.claude.com/en/docs/claude-code/hooks',changes:[
+  {op:"add",cloud:"Хуки (Hooks)",t:"Примеры хуков",x:"PostToolUse — прогнать prettier после каждой правки. PreToolUse — заблокировать опасную команду. Stop — уведомление, что агент закончил. Настраиваются в .claude/settings.json."},
+  {op:"mod",cloud:"Git и деплой",t:"Минимум команд",nt:"Агент и git",x:"Агент сам делает ветки, коммиты с описанием и PR через gh, читает комментарии ревью и правит код. Твоя часть — ревью диффа перед мержем."}
+ ]},
+ {id:'c7972e6',date:'2026-11-13 16:40',parent:'0a67d21',branch:'оранжевая',title:"скиллы: как превратить пожелание в правило",src:'https://habr.com/ru/articles/1066212/',changes:[
+  {op:"mod",cloud:"Скиллы (Skills)",t:"Что это",x:"Папка с файлом <code>SKILL.md</code> (+ опционально скрипты, шаблоны, примеры): что сделать и в каком порядке, чтобы результат получился как надо. Это открытый формат со спецификацией — скиллы понимают Claude Code, агенты OpenAI, Google и другие."},
+  {op:"mod",cloud:"Скиллы (Skills)",t:"Как работают",x:"Прогрессивное раскрытие: в контексте висят только имя и описание скилла. Когда задача совпадает — агент читает весь <code>SKILL.md</code>, а сопутствующие файлы открывает, только когда инструкция велит. Поэтому 50 скиллов не съедают окно."},
+  {op:"add",cloud:"Скиллы (Skills)",t:"Скилл vs промпт, CLAUDE.md, MCP",x:"Промпт живёт одну сессию и забывается. CLAUDE.md висит в контексте всегда и всегда занимает место. MCP даёт агенту новый инструмент (данные, API). Скилл даёт инструкцию, как работать в твоём проекте, и грузится только по делу."},
+  {op:"add",cloud:"Скиллы (Skills)",t:"Когда пора писать скилл",x:"Когда агент делает одно и то же каждый раз по-разному. Рано — если собирать не из чего: сначала пройди задачу сам. Собирай из примеров, заметок и удачных прошлых промптов."},
+  {op:"add",cloud:"Скиллы (Skills)",t:"Description — главная строка",x:"По описанию агент решает, включать ли скилл. Лимит 1024 символа; оно попадает в системный промпт — пиши от третьего лица. Укажи, что скилл делает, когда срабатывает, и ключевые слова, по которым его искать."},
+  {op:"add",cloud:"Скиллы (Skills)",t:"Только то, чего агент не знает",x:"Каждую строку проверяй вопросом «модель это и так знает?». Общеизвестное просто жжёт токены — нужны твои конкретные правила. Ориентир по размеру: до ~5000 токенов, примерно 500 строк."},
+  {op:"add",cloud:"Скиллы (Skills)",t:"Разделы SKILL.md",x:"Обязательно: заголовок (что делает, когда использовать и когда нет) и шаги по порядку. По желанию: примеры входа и выхода, ловушки, чек-лист самопроверки перед ответом, когда открывать файлы из <code>references/</code>, <code>scripts/</code>, <code>assets/</code>."},
+  {op:"add",cloud:"Скиллы (Skills)",t:"Раздел «Ловушки»",x:"Неочевидные нюансы, на которых агент ошибается. Пополняй его каждый раз, когда скилл сработал не так, как ожидал, — так скилл копит опыт."},
+  {op:"add",cloud:"Скиллы (Skills)",t:"Пожелание → правило: валидатор",x:"Любую инструкцию, которую нельзя проверить, агент рано или поздно нарушит. Положи в <code>scripts/</code> проверку результата (стоп-слова, штампы, запрещённые символы, формат) и сделай её запуск шагом скилла: скрипт печатает OK или список проблем со строками."},
+  {op:"add",cloud:"Скиллы (Skills)",t:"Ложные срабатывания",x:"Проверка по списку не понимает смысла: «ничего революционного» в насмешку тоже поймается. Явно напиши в скилле, какие срабатывания агенту можно игнорировать."},
+  {op:"add",cloud:"Скиллы (Skills)",t:"references, scripts, assets",x:"<code>references/</code> агент читает как справку, <code>scripts/</code> запускает как программы, <code>assets/</code> берёт как готовые шаблоны. В <code>SKILL.md</code> — то, что нужно почти всегда; громоздкое и редкое — в эти папки."},
+  {op:"add",cloud:"Скиллы (Skills)",t:"Как ссылаться на файлы",x:"Ссылайся прямо из <code>SKILL.md</code> и называй момент: «открой <code>references/stop-list.md</code>, когда валидатор что-то нашёл» работает лучше, чем «детали — в references/». Не строй цепочек файл → файл: агент может дочитать только начало."},
+  {op:"add",cloud:"Скиллы (Skills)",t:"Мягкий совет ≠ шаг",x:"Если действие важно, сделай его отдельным шагом, а не советом в конце абзаца. Пример из статьи: агент не открыл шаблон поста, пока копирование шаблона не стало явным первым шагом."},
+  {op:"add",cloud:"Скиллы (Skills)",t:"Отладка по трейсу",x:"Первый драфт всегда сырой. Дай задачу в новой сессии и смотри трейс: какой скилл включился, какие файлы открыл и в каком порядке. Перебирает подходы — инструкция расплывчата; не открыл файл — нет ссылки или момента; скилл не включился — правь description."},
+  {op:"add",cloud:"Скиллы (Skills)",t:"На каком языке писать",x:"Скиллы обычно держат на английском: экосистема и примеры англоязычные. Главное — чтобы правила были конкретными и проверяемыми."},
+  {op:"add",cloud:"Скиллы (Skills)",t:"Скилл для создания скиллов",x:"Заведи мета-скилл, который по описанию собирает новый скилл по твоим правилам (у автора статьи — <code>new-skill</code>, у Anthropic есть <code>skill-creator</code>)."},
+  {op:"add",cloud:"Скиллы (Skills)",t:"Спецификация Agent Skills (agentskills.io)",adv:true},
+  {op:"add",cloud:"Опыт разработчика + ИИ",t:"Зоопарк кода",x:"Без общих правил агент каждый раз решает по-своему: тесты, структура папок, вызовы API. Через месяц — зоопарк, который некому передать. Договорённости из промптов в новой сессии забываются — фиксируй их скиллами с проверками."},
+  {op:"add",cloud:"Контекст и память",t:"CLAUDE.md или скилл?",x:"В CLAUDE.md — только то, что нужно в каждой сессии: стек, команды, запреты. Пошаговые процедуры (как писать пост, как делать компонент) — в скиллы: они грузятся только когда нужны и не занимают контекст постоянно."},
+  {op:"add",cloud:"Автотесты",t:"Валидаторы не только для кода",x:"Тот же принцип, что у тестов, работает для текстов, конфигов и документации: скрипт проверяет результат агента и выдаёт OK или список проблем. Агент запускает его сам и исправляет, пока не станет зелёно."}
+ ]}
+];
+const CMAP=Object.fromEntries(COMMITS.map(c=>[c.id,c]));
+const ROOT_BR=COMMITS.find(c=>!c.parent).branch;
+// что выбрано: ветка (b:имя → её head) или конкретный коммит (c:хеш)
+// адрес: #v=<ветка/коммит>&x=…&y=…&z=… (x,y — центр экрана в координатах карты, z — масштаб)
+const HP=new URLSearchParams(location.hash.slice(1));
+let SEL=HP.get('v')||'';
+const resolve=x=>x.startsWith('b:')?(BRANCHES[x.slice(2)]||{}).head:x.startsWith('c:')?x.slice(2):null;
+if(!CMAP[resolve(SEL)]){try{SEL=localStorage.getItem('ver')||''}catch(e){}}
+const RECOMMENDED=(Object.entries(BRANCHES).find(([,b])=>b.recommended)||[ROOT_BR])[0];
+if(!CMAP[resolve(SEL)])SEL='b:'+RECOMMENDED;
+try{localStorage.setItem('ver',SEL)}catch(e){}
+const ACTIVE=resolve(SEL);
+const brColor=b=>(BRANCHES[b]||{}).color||'#999';
+DATA.forEach(c=>c.k=c.k.map(k=>k.adv?{t:k.t,adv:true}:{t:k[0],x:k[1]}));
+(()=>{const chain=[];for(let v=CMAP[ACTIVE];v;v=CMAP[v.parent])chain.unshift(v);
+ chain.forEach(v=>{
+  for(const ch of v.changes||[]){
+   if(ch.op==='cloud'){DATA.push({t:ch.t,s:ch.s||'',o:ch.o,k:[]});continue}
+   const c=DATA.find(c=>c.t===ch.cloud);if(!c){console.warn('Коммит '+v.id+': нет облака',ch.cloud);continue}
+   const i=c.k.findIndex(k=>k.t===ch.t);
+   if(ch.op==='add')c.k.push({t:ch.t,x:ch.x,adv:ch.adv});
+   else if(i<0)console.warn('Коммит '+v.id+': нет темы',ch.t);
+   else if(ch.op==='mod')c.k[i]={...c.k[i],t:ch.nt||ch.t,x:ch.x??c.k[i].x};
+   else if(ch.op==='del')c.k.splice(i,1);
+  }});})();
+const world=document.getElementById('world'), vp=document.getElementById('viewport');
+const COLS=4, CW=1500, GAP=120, PAD=200; // GAP — минимальный зазор между краями облаков (с пуфами)
+const heights=[];
+DATA.forEach((c,i)=>{
+  const el=document.createElement('div'); el.className='big'+(c.o?' orphan':'');
+  el.innerHTML=`<div class="head"><h2>${c.t}</h2>${c.s?`<div class="sub">${c.s}</div>`:''}</div><div class="kids">${
+    c.k.map(k=>k.adv?`<div class="kid adv"><h3>${k.t}</h3></div>`:`<div class="kid"><h3>${k.t}</h3><p>${k.x}</p></div>`).join('')}</div>`;
+  world.appendChild(el); c.el=el;
+});
+
+// ===== Роадмап =====
+const L=(u,t)=>`<a href="${u}" target="_blank" rel="noopener">${t}</a>`;
+const ROAD=[
+ {h:"Поставь агента",w:"день 1",to:["Основы ИИ","Инструменты"],
+  g:"Цель: агент работает в твоём реальном рабочем проекте.",
+  p:["Установи Claude Code (или Cursor) и залогинься","Попроси агента «объясни архитектуру этого проекта» — сравни со своим пониманием","Сделай одну мелкую задачу из бэклога целиком руками агента"],
+  r:[L("https://docs.claude.com/en/docs/claude-code/overview","Claude Code — документация")]},
+ {h:"Научись ставить задачи",w:"неделя 1",to:["Промптинг","Опыт разработчика + ИИ"],
+  g:"Цель: 80% задач агент делает с первой-второй попытки.",
+  p:["Пиши промпты как тикеты: контекст → задача → критерий готовности","Используй plan mode перед крупными изменениями","Заведи заметку «промпты, которые сработали»"],
+  r:[L("https://docs.claude.com/en/docs/build-with-claude/prompt-engineering/overview","Prompt engineering от Anthropic"),L("https://www.promptingguide.ai/ru","Prompting Guide (рус.)")]},
+ {h:"Дай проекту память",w:"неделя 1–2",to:["Контекст и память","Slash-команды"],
+  g:"Цель: агенту не нужно заново объяснять стек и правила.",
+  p:["Запусти <code>/init</code> — получишь CLAUDE.md, отредактируй его","Впиши команды запуска, линтер, код-стайл, запреты","Привыкни к <code>/clear</code> между задачами"],
+  r:[L("https://docs.claude.com/en/docs/claude-code/memory","Память и CLAUDE.md")]},
+ {h:"Страховочная сетка",w:"неделя 2",to:["Git и деплой","Автотесты"],
+  g:"Цель: агент сам проверяет, что ничего не сломал.",
+  p:["Коммит перед каждой задачей, ревью через git diff","Пусть агент напишет Playwright-тест на ключевой сценарий","Добавь в CLAUDE.md: «после правок запускай lint + tests»"],
+  r:[L("https://playwright.dev/docs/intro","Playwright"),L("https://vitest.dev/guide/","Vitest")]},
+ {h:"Подключи MCP",w:"неделя 3",to:["MCP","Дизайн → код"],
+  g:"Цель: агент видит макеты, документацию и живой браузер.",
+  p:["Подключи Context7 (свежие доки) и Playwright MCP","Если есть Figma — Figma MCP, сверстай экран по ссылке","Проверь, сколько контекста съедает каждый сервер (<code>/context</code>)"],
+  r:[L("https://modelcontextprotocol.io/introduction","modelcontextprotocol.io"),L("https://docs.claude.com/en/docs/claude-code/mcp","MCP в Claude Code")]},
+ {h:"Свои скиллы и хуки",w:"неделя 4",to:["Скиллы (Skills)","Хуки (Hooks)"],
+  g:"Цель: повторяющиеся процессы команды автоматизированы.",
+  p:["Поставь 1–2 готовых скилла, прочитав их SKILL.md","Напиши свой: «как у нас делают компонент» с примерами","Хук: автоформат prettier после каждой правки"],
+  r:[L("https://github.com/anthropics/skills","anthropics/skills на GitHub"),L("https://docs.claude.com/en/docs/claude-code/hooks","Хуки — документация")]},
+ {h:"Считай токены",w:"месяц 2",to:["Оркестрация и экономия токенов","Биллинг"],
+  g:"Цель: понимаешь, на что уходят лимиты, и не упираешься в них.",
+  p:["Смотри <code>/usage</code> после рабочего дня","Делегируй поиск субагентам, рутину — младшей модели","Реши: подписка или API — по реальным цифрам"],
+  r:[L("https://docs.claude.com/en/docs/claude-code/costs","Стоимость Claude Code")]},
+ {h:"Безопасность — всегда",w:"с первого дня",to:["Безопасность","Общие фишки"],
+  g:"Цель: ни один секрет и ни одна чужая инструкция не прошли мимо тебя.",
+  p:["Не давай «разрешить всё» без чтения","Проверяй пакеты, которые предлагает ИИ","Читай чужие скиллы и MCP перед установкой"],
+  r:[L("https://docs.claude.com/en/docs/claude-code/security","Security в Claude Code"),L("https://owasp.org/www-project-top-10-for-large-language-model-applications/","OWASP Top 10 для LLM")]},
+ {h:"Дальше — по желанию",w:"когда освоишься",to:["Продвинутое"],
+  g:"Цель: выбрать одну продвинутую тему под свою работу.",
+  p:["Параллельные агенты, агенты в CI, локальные модели — смотри фиолетовые темы на карте"],r:[]}
+];
+const road=document.createElement('div');road.className='big road';
+road.style.padding='160px 160px 140px';
+road.innerHTML=`<h2>Роадмап</h2><div class="sub">с чего начать и во что углубляться · наведи на номер — увидишь, к каким облакам он ведёт</div><div class="steps">${
+ ROAD.map((st,i)=>`<div class="step"><div class="num" data-to="${st.to.join('|')}">${i+1}</div><h3>${st.h}</h3><div class="when">${st.w}</div><div class="goal">${st.g}</div><ul>${st.p.map(x=>`<li>${x}</li>`).join('')}</ul>${st.r.length?`<div>📖 ${st.r.join(' · ')}</div>`:''}<div class="to">→ ${st.to.join(', ')}</div></div>`).join('')}</div>`;
+world.appendChild(road);
+
+// ===== Настоящие облака: тело + «пуфы» по всему периметру =====
+function rng(seed){return()=>{seed=(seed*16807)%2147483647;return seed/2147483647}}
+function cloudify(el,seed,big){
+  const w=el.offsetWidth,h=el.offsetHeight,R=rng(seed+7);
+  const r=Math.min(big?260:70,Math.max(big?120:34,Math.min(w,h)*0.17)),m=r*2;
+  let c=`<rect x="0" y="0" width="${w}" height="${h}" rx="${r}"/>`;
+  const ext={l:0,t:0,r:0,b:0};
+  const edge=(x1,y1,x2,y2,lo,hi)=>{const len=Math.hypot(x2-x1,y2-y1),n=Math.max(2,Math.round(len/(r*1.25)));
+    for(let i=0;i<=n;i++){const t=i/n,rr=r*(lo+R()*(hi-lo)),cx=x1+(x2-x1)*t+(R()-.5)*r*.3,cy=y1+(y2-y1)*t;c+=`<circle cx="${cx}" cy="${cy}" r="${rr}"/>`;
+      ext.l=Math.max(ext.l,rr-cx);ext.t=Math.max(ext.t,rr-cy);ext.r=Math.max(ext.r,cx+rr-w);ext.b=Math.max(ext.b,cy+rr-h)}};
+  const ins=r*0.35;
+  edge(ins,ins,w-ins,ins,1.0,1.6);        // верх — крупные пуфы
+  edge(w-ins,ins,w-ins,h-ins,0.8,1.2);    // право
+  edge(w-ins,h-ins,ins,h-ins,0.7,1.0);    // низ — плоский
+  edge(ins,h-ins,ins,ins,0.8,1.2);        // лево
+  const svg=document.createElementNS('http://www.w3.org/2000/svg','svg');
+  svg.setAttribute('class','cbg');svg.setAttribute('width',w+2*m);svg.setAttribute('height',h+2*m);
+  svg.style.left=-m+'px';svg.style.top=-m+'px';
+  svg.innerHTML=`<g transform="translate(${m},${m})">${el.classList.contains("orphan")?`<g class="ol">${c}</g>`:""}<g class="body">${c}</g></g>`;
+  el.prepend(svg);
+  return ext;
+}
+// маленькие облака: отступ = выступ пуфов + половина зазора, поэтому соседи не касаются
+document.querySelectorAll('.kid:not(.adv)').forEach(k=>{const p=k.querySelector('p');if(p&&p.scrollHeight>p.clientHeight+1)k.classList.add('clipped')});
+const KGAP=60;
+document.querySelectorAll('.kid').forEach((k,i)=>{const e=cloudify(k,i*31+5,false);
+  k.style.margin=`${e.t+KGAP/2}px ${e.r+KGAP/2}px ${e.b+KGAP/2}px ${e.l+KGAP/2}px`;});
+// темы внутри облака: ширина облака у всех одна, высота — по блоку тем + ~70px (не квадрат, без пустоты сверху/снизу).
+// Число колонок подбираем так, чтобы темы вышли как можно крупнее, но блок не был выше MAX_H.
+const CLOUD=1500,INNER_W=1360,MAX_H=1100,PAD_V=35,MIN_H=760;   // MIN_H — чтобы на обзоре влезало название
+DATA.forEach(c=>{c.head=c.el.querySelector('.head');const kw=c.kw=c.el.querySelector('.kids');const kids=[...kw.children];
+  let H=MIN_H;c.scale=1;
+  if(kids.length){
+    const kidW=Math.max(...kids.map(k=>k.offsetWidth+parseFloat(k.style.marginLeft||0)+parseFloat(k.style.marginRight||0)));
+    // поля блока = половина зазора между темами: их не считаем пустотой облака
+    const m=KGAP/2;let best=null;
+    for(let cols=1;cols<=Math.min(kids.length,10);cols++){kw.style.width=cols*kidW+'px';
+      const w=kw.offsetWidth-2*m,h=kw.offsetHeight-2*m,k=Math.min(1,INNER_W/w,MAX_H/h);if(!best||k>best.k+1e-6)best={cols,k}}
+    kw.style.width=best.cols*kidW+'px';c.scale=best.k;
+    H=Math.max(MIN_H,(kw.offsetHeight-2*m)*best.k+2*PAD_V);
+    kw.style.transform=`translate(${(CLOUD-kw.offsetWidth*best.k)/2}px,${(H-kw.offsetHeight*best.k)/2}px) scale(${best.k})`;}
+  c.el.style.height=H+'px';});
+// большие облака: сетка с учётом реальных выступов
+DATA.forEach((c,i)=>c.ext=cloudify(c.el,i*97+3,true));
+const E=Math.max(...DATA.map(c=>Math.max(c.ext.l,c.ext.r)));
+const W=2*(PAD+E)+COLS*CW+(COLS-1)*(2*E+GAP);
+const rows=[];for(let i=0;i<DATA.length;i+=COLS)rows.push(DATA.slice(i,i+COLS));
+let y=PAD+Math.max(...rows[0].map(c=>c.ext.t));
+rows.forEach((row,ri)=>{let h=0,b=0;
+  row.forEach((c,j)=>{c.el.style.left=(PAD+E+j*(CW+2*E+GAP))+'px';c.el.style.top=y+'px';h=Math.max(h,c.el.offsetHeight);b=Math.max(b,c.ext.b)});
+  const nt=ri+1<rows.length?Math.max(...rows[ri+1].map(c=>c.ext.t)):0;
+  row.bottom=y+h+b; y=y+h+b+GAP+nt;});
+road.style.width=(W-2*(PAD+E))+'px';road.style.left=(PAD+E)+'px';
+const re=cloudify(road,777,true);
+y=rows[rows.length-1].bottom+GAP+re.t; road.style.top=y+'px';
+const H=y+road.offsetHeight+re.b+PAD;
+world.style.width=W+'px'; world.style.height=H+'px';
+
+// ===== Длинный текст темы: карточка для чтения =====
+// Клик по обрезанной теме открывает карточку рядом с ней — обычного экранного размера при любом масштабе карты.
+const reader=document.createElement('div');reader.id='reader';reader.setAttribute('role','dialog');document.body.appendChild(reader);
+let readerKid=null;
+function openReader(kid){
+  const big=kid.closest('.big');readerKid=kid;
+  reader.innerHTML=`<button class="rclose" aria-label="Закрыть">×</button><div class="rcloud">${big.querySelector('h2').textContent}</div><h3>${kid.querySelector('h3').textContent}</h3><p>${kid.querySelector('p').innerHTML}</p>`;
+  reader.classList.add('open');
+  const r=kid.getBoundingClientRect(),W=reader.offsetWidth,H=reader.offsetHeight;
+  let left=r.right+12;if(left+W>innerWidth-12)left=r.left-12-W;if(left<12)left=Math.max(12,(innerWidth-W)/2);
+  reader.style.left=left+'px';reader.style.top=Math.max(12,Math.min(innerHeight-H-12,r.top))+'px';
+}
+function closeReader(){if(!readerKid)return;readerKid=null;reader.classList.remove('open')}
+reader.addEventListener('click',e=>{if(e.target.closest('.rclose'))closeReader()});
+addEventListener('pointerdown',e=>{if(readerKid&&!reader.contains(e.target)&&!e.target.closest('.kid.clipped'))closeReader()},true);
+vp.addEventListener('wheel',closeReader);
+
+// ===== Пунктирные линии от номера к облакам =====
+const NS='http://www.w3.org/2000/svg',links=document.createElementNS(NS,'svg');
+links.id='links';links.setAttribute('width',W);links.setAttribute('height',H);world.appendChild(links);
+const byTitle=Object.fromEntries(DATA.map(c=>[c.t,c.el]));
+function wpos(el){const b=el.getBoundingClientRect();return{x:(b.left-x)/s,y:(b.top-yy)/s,w:b.width/s,h:b.height/s}}
+// ===== Меню-облачка у номера: наведение открывает, уход с номера/меню/безопасного треугольника закрывает =====
+const pop=document.createElement('div');pop.id='pop';document.body.appendChild(pop);
+let popNum=null,anchor=null;
+function clearHl(){links.innerHTML='';document.querySelectorAll('.big.hl').forEach(e=>e.classList.remove('hl'))}
+function drawLinks(n,only){
+  clearHl();const p=wpos(n),sx=p.x+p.w/2,sy=p.y;
+  n.dataset.to.split('|').forEach(t=>{const el=byTitle[t];if(!el||(only&&only!==t))return;el.classList.add('hl');
+    const tx=el.offsetLeft+el.offsetWidth/2,ty=el.offsetTop+el.offsetHeight+40;
+    const path=document.createElementNS(NS,'path');
+    path.setAttribute('d',`M${sx},${sy} C${sx},${sy-(sy-ty)*0.5} ${tx},${ty+(sy-ty)*0.5} ${tx},${ty}`);
+    links.appendChild(path);});
+}
+function openPop(n){
+  if(popNum===n)return;popNum=n;drawLinks(n);
+  pop.innerHTML='<div class="pt">Перейти к облаку</div>'+n.dataset.to.split('|').map(t=>`<button class="mini" data-t="${t}">${t}</button>`).join('');
+  const r=n.getBoundingClientRect();pop.classList.add('open');
+  const pw=pop.offsetWidth,ph=pop.offsetHeight;
+  let left=r.right+14,side='r';if(left+pw>innerWidth-8){left=r.left-14-pw;side='l'}
+  const top=Math.max(8,Math.min(innerHeight-ph-8,r.top+r.height/2-ph/2));
+  pop.style.left=left+'px';pop.style.top=top+'px';pop.dataset.side=side;
+}
+function closePop(){if(!popNum)return;popNum=null;anchor=null;pop.classList.remove('open');clearHl()}
+const inR=(p,r,pad=0)=>p.x>=r.left-pad&&p.x<=r.right+pad&&p.y>=r.top-pad&&p.y<=r.bottom+pad;
+function inTri(p,a,b,c){const s=(p1,p2,p3)=>(p1.x-p3.x)*(p2.y-p3.y)-(p2.x-p3.x)*(p1.y-p3.y);
+  const d1=s(p,a,b),d2=s(p,b,c),d3=s(p,c,a);return !((d1<0||d2<0||d3<0)&&(d1>0||d2>0||d3>0))}
+addEventListener('pointermove',e=>{
+  if(!popNum)return;const p={x:e.clientX,y:e.clientY};
+  const nr=popNum.getBoundingClientRect(),pr=pop.getBoundingClientRect();
+  if(inR(p,nr,4)){anchor=p;return}          // на номере — запоминаем вершину треугольника
+  if(inR(p,pr))return;                       // внутри меню
+  if(anchor){const ex=pop.dataset.side==='r'?pr.left:pr.right;   // безопасный треугольник к ближнему краю меню
+    if(inTri(p,anchor,{x:ex,y:pr.top-10},{x:ex,y:pr.bottom+10}))return;}
+  closePop();
+});
+pop.addEventListener('mouseover',e=>{const b=e.target.closest('.mini');if(b&&popNum)drawLinks(popNum,b.dataset.t)});
+pop.addEventListener('mouseleave',()=>{if(popNum)drawLinks(popNum)});
+pop.addEventListener('click',e=>{const b=e.target.closest('.mini');if(!b)return;const el=byTitle[b.dataset.t];closePop();
+  if(el)zoomToCloud(el)});
+road.querySelectorAll('.num').forEach(n=>{
+  n.addEventListener('mouseenter',e=>{anchor={x:e.clientX,y:e.clientY};openPop(n)});
+  n.addEventListener('click',e=>{e.stopPropagation();popNum===n?closePop():openPop(n)});  // для тача
+});
+vp.addEventListener('wheel',closePop);
+vp.addEventListener('pointerdown',e=>{if(!e.target.closest('.num'))closePop()});
+
+// подсказка сворачивается в точку
+const legend=document.getElementById('legend');
+// вкладки панели и меню версий
+function setTab(t){document.documentElement.dataset.tab=t;prefSet('legendTab',t)}
+legend.querySelector('.tabs').onclick=e=>{const b=e.target.closest('button');if(b)setTab(b.dataset.tab)};
+(()=>{const list=document.getElementById('vlist');let h='';
+ document.getElementById('vcur').textContent=SEL.startsWith('b:')?SEL.slice(2)+' · '+ACTIVE:ACTIVE;
+ const row=(val,on,inner,extra='')=>`<label class="vrow${on?' on':''}${extra}"><input type="radio" name="ver" value="${val}"${on?' checked':''}><span>${inner}</span></label>`;
+ // порядок: рекомендуемая, базовая, затем остальные — по дате последнего коммита, свежие выше
+ const rank=b=>b===RECOMMENDED?0:b===ROOT_BR?1:2;
+ const order=Object.entries(BRANCHES).sort(([a,x],[b,y])=>rank(a)-rank(b)||String(CMAP[y.head]?.date||'').localeCompare(String(CMAP[x.head]?.date||'')));
+ for(const [b,{color,head}] of order){
+  const own=[];let c=CMAP[head];while(c&&c.branch===b){own.push(c);c=CMAP[c.parent]}   // коммиты ветки, от новых к старым
+  const fork=c?`от ${c.id} (${c.branch})`:'корень';
+  h+=`<div class="vbr" style="--c:${color}">`+row('b:'+b,SEL==='b:'+b,`<span class="chip">${b}</span>${b===RECOMMENDED?' <span class="rec">★ рекомендуемая</span>':''} <small>${own.length} комм. · ${fork}${CMAP[head]?.date?' · '+CMAP[head].date:''}</small>`,' vhead2');
+  h+=own.map(c=>row('c:'+c.id,SEL==='c:'+c.id,`<code>${c.id}</code>${c.id===head?' <small class="hd">HEAD</small>':''}<small>${c.title||''}</small>${c.src?`<a href="${c.src}" target="_blank" rel="noopener">источник ↗</a>`:''}`,' br')).join('')+'</div>';}
+ list.innerHTML=h;
+ list.onchange=e=>{HP.set('v',e.target.value);location.hash=HP.toString();location.reload()};})();
+document.getElementById('ldot').onclick=()=>prefSet('legend',document.documentElement.classList.toggle('legend-min')?'min':'open');
+
+let s=1,x=0,yy=0;
+// положение на карте: пишем в адрес и в localStorage (с задержкой, чтобы не дёргать историю на каждом кадре)
+let posTimer=0;
+function savePos(){clearTimeout(posTimer);posTimer=setTimeout(()=>{
+  const cx=(innerWidth/2-x)/s,cy=(innerHeight/2-yy)/s;
+  HP.set('v',SEL);HP.set('x',Math.round(cx));HP.set('y',Math.round(cy));HP.set('z',+s.toFixed(4));
+  history.replaceState(null,'','#'+HP.toString());
+  try{localStorage.setItem('pos',JSON.stringify({x:cx,y:cy,z:s}))}catch(e){}},300)}
+function restorePos(p){if(!p||![p.x,p.y,p.z].every(Number.isFinite)||p.z<=0)return false;
+  s=Math.min(8,Math.max(0.03,p.z));x=innerWidth/2-p.x*s;yy=innerHeight/2-p.y*s;apply(false);return true}
+function apply(anim){world.classList.toggle('noanim',!anim);world.style.transform=`translate(${x}px,${yy}px) scale(${s})`;savePos();
+  if(!lodRaf)lodRaf=requestAnimationFrame(updateLOD);}
+// Облако в центре экрана: чем крупнее на экране его текст, тем прозрачнее заголовок и плотнее темы.
+// Остальные облака — только заголовок, темы скрыты (visibility:hidden — браузер их не рисует).
+const TXT=20,LOD_FROM=4,LOD_TO=9;   // экранный размер текста темы (px): с 4 начинает проявляться, к 9 — полностью
+let lodRaf=0;
+function updateLOD(){lodRaf=0;
+  const cx=(innerWidth/2-x)/s,cy=(innerHeight/2-yy)/s,near=300/s;let best=null,bd=Infinity;
+  for(const c of DATA){const L=c.el.offsetLeft,T=c.el.offsetTop,d=Math.hypot(Math.max(L-cx,0,cx-L-c.el.offsetWidth),Math.max(T-cy,0,cy-T-c.el.offsetHeight));if(d<bd){bd=d;best=c}}
+  if(bd>near)best=null;
+  for(const c of DATA){const t=c===best?Math.min(1,Math.max(0,(TXT*c.scale*s-LOD_FROM)/(LOD_TO-LOD_FROM))):0;
+    if(c.t===t)continue;c.t=t;c.head.style.opacity=1-t;c.kw.style.opacity=t;c.el.classList.toggle('show',t>0)}}
+// клик по облаку: приблизить так, чтобы темы сразу читались
+function zoomToCloud(b){const c=DATA.find(c=>c.el===b);const need=c?LOD_TO/(TXT*c.scale):0;
+  fit(b.offsetLeft,b.offsetTop,b.offsetWidth,b.offsetHeight);if(s<need){const px=b.offsetLeft+b.offsetWidth/2,py=b.offsetTop+b.offsetHeight/2;s=need;x=innerWidth/2-px*s;yy=innerHeight/2-py*s;apply(true)}}
+function fit(rx,ry,rw,rh,anim=true){const vw=innerWidth,vh=innerHeight;s=Math.min(vw/rw,vh/rh)*0.92;x=(vw-rw*s)/2-rx*s;yy=(vh-rh*s)/2-ry*s;apply(anim)}
+function home(){fit(0,0,W,H)}
+function zoomAt(f,cx,cy){const ns=Math.min(8,Math.max(0.03,s*f));x=cx-(cx-x)*ns/s;yy=cy-(cy-yy)*ns/s;s=ns;apply(false)}
+vp.addEventListener('wheel',e=>{e.preventDefault();zoomAt(Math.exp(-e.deltaY*0.0015),e.clientX,e.clientY)},{passive:false});
+// перетаскивание + щипок
+const ptrs=new Map();let moved=0,pd=0;
+vp.addEventListener('pointerdown',e=>{if(e.target.closest('a,.num'))return;ptrs.set(e.pointerId,{x:e.clientX,y:e.clientY});moved=0;vp.classList.add('drag')});
+addEventListener('pointermove',e=>{if(!ptrs.has(e.pointerId))return;const p=ptrs.get(e.pointerId);
+  if(ptrs.size===1){x+=e.clientX-p.x;yy+=e.clientY-p.y;moved+=Math.abs(e.clientX-p.x)+Math.abs(e.clientY-p.y);apply(false)}
+  ptrs.set(e.pointerId,{x:e.clientX,y:e.clientY});
+  if(ptrs.size===2){const [a,b]=[...ptrs.values()];const d=Math.hypot(a.x-b.x,a.y-b.y);if(pd)zoomAt(d/pd,(a.x+b.x)/2,(a.y+b.y)/2);pd=d;moved=99}});
+const up=e=>{ptrs.delete(e.pointerId);if(ptrs.size<2)pd=0;if(!ptrs.size)vp.classList.remove('drag')};
+addEventListener('pointerup',up);addEventListener('pointercancel',up);
+vp.addEventListener('click',e=>{if(moved>6)return;if(e.target.closest('a'))return;const ck=e.target.closest('.kid.clipped');if(ck){readerKid===ck?closeReader():openReader(ck);return}const b=e.target.closest('.big');if(!b||b.classList.contains('road')||b.classList.contains('show'))return;zoomToCloud(b)});
+document.getElementById('zin').onclick=()=>zoomAt(1.4,innerWidth/2,innerHeight/2);
+document.getElementById('zout').onclick=()=>zoomAt(1/1.4,innerWidth/2,innerHeight/2);
+document.getElementById('home').onclick=home;
+addEventListener('keydown',e=>{if(e.key!=='Escape')return;if(readerKid)closeReader();else home()});
+// при загрузке: координаты из адреса → последнее положение → (только при первом заходе) роадмап
+let savedPos=null;try{savedPos=JSON.parse(localStorage.getItem('pos')||'null')}catch(e){}
+if(!restorePos(HP.has('z')?{x:+HP.get('x'),y:+HP.get('y'),z:+HP.get('z')}:null)&&!restorePos(savedPos))
+  fit(road.offsetLeft,road.offsetTop-200,road.offsetWidth,road.offsetHeight+400,false);
+</script>
+</body>
+</html>
